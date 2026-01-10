@@ -1,11 +1,13 @@
 package com.hik.test.data.mapper;
 
 import com.hik.test.data.dto.JiraDetailDO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
 
+@Mapper
 public interface JiraDetailMapper {
 
     int insert(JiraDetailDO record);

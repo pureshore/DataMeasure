@@ -26,9 +26,9 @@ public class JiraDetailServiceImpl implements JiraDetailService {
     public Long createJira(JiraDetailDO jiraDetail) {
         try {
             // 检查JIRA单号是否已存在
-            JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNumber());
+            JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNo());
             if (existing != null) {
-                throw new RuntimeException("JIRA单号已存在: " + jiraDetail.getJiraNumber());
+                throw new RuntimeException("JIRA单号已存在: " + jiraDetail.getJiraNo());
             }
 
             // 设置默认值
@@ -38,7 +38,7 @@ public class JiraDetailServiceImpl implements JiraDetailService {
 
             jiraDetailMapper.insert(jiraDetail);
             log.info("创建JIRA记录成功, ID: {}, JIRA单号: {}",
-                    jiraDetail.getId(), jiraDetail.getJiraNumber());
+                    jiraDetail.getId(), jiraDetail.getJiraNo());
             return jiraDetail.getId();
         } catch (Exception e) {
             log.error("创建JIRA记录失败: {}", e.getMessage(), e);
@@ -56,16 +56,16 @@ public class JiraDetailServiceImpl implements JiraDetailService {
         try {
             // 过滤掉已存在的JIRA单号
             List<String> jiraNumbers = jiraDetails.stream()
-                    .map(JiraDetailDO::getJiraNumber)
+                    .map(JiraDetailDO::getJiraNo)
                     .collect(Collectors.toList());
 
             Set<String> existingNumbers = jiraDetails.stream()
-                    .filter(jira -> jiraDetailMapper.selectByJiraNumber(jira.getJiraNumber()) != null)
-                    .map(JiraDetailDO::getJiraNumber)
+                    .filter(jira -> jiraDetailMapper.selectByJiraNumber(jira.getJiraNo()) != null)
+                    .map(JiraDetailDO::getJiraNo)
                     .collect(Collectors.toSet());
 
             List<JiraDetailDO> newJiras = jiraDetails.stream()
-                    .filter(jira -> !existingNumbers.contains(jira.getJiraNumber()))
+                    .filter(jira -> !existingNumbers.contains(jira.getJiraNo()))
                     .peek(jira -> {
                         if (jira.getStatus() == null) {
                             jira.setStatus(1);
@@ -115,10 +115,10 @@ public class JiraDetailServiceImpl implements JiraDetailService {
             }
 
             // 如果修改了JIRA单号，检查是否已存在
-            if (jiraDetail.getJiraNumber() != null) {
-                JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNumber());
+            if (jiraDetail.getJiraNo() != null) {
+                JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNo());
                 if (existing != null && !existing.getId().equals(jiraDetail.getId())) {
-                    throw new RuntimeException("JIRA单号已存在: " + jiraDetail.getJiraNumber());
+                    throw new RuntimeException("JIRA单号已存在: " + jiraDetail.getJiraNo());
                 }
             }
 
@@ -190,7 +190,7 @@ public class JiraDetailServiceImpl implements JiraDetailService {
             // 按JIRA单号分组
             Map<String, JiraDetailDO> syncDataMap = jiraDetails.stream()
                     .collect(Collectors.toMap(
-                            JiraDetailDO::getJiraNumber,
+                            JiraDetailDO::getJiraNo,
                             jira -> jira,
                             (existing, replacement) -> replacement));
 
@@ -227,7 +227,7 @@ public class JiraDetailServiceImpl implements JiraDetailService {
             // 批量更新已有数据
             int updateCount = 0;
             for (JiraDetailDO jiraDetail : toUpdate) {
-                JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNumber());
+                JiraDetailDO existing = jiraDetailMapper.selectByJiraNumber(jiraDetail.getJiraNo());
                 if (existing != null) {
                     jiraDetail.setId(existing.getId());
                     jiraDetailMapper.update(jiraDetail);

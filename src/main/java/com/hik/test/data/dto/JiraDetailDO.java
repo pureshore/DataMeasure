@@ -19,7 +19,7 @@ public class JiraDetailDO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
-    private String jiraNumber;
+    private String jiraNo;
     private String jiraName;
     private String labelName;
     private String productLine;
