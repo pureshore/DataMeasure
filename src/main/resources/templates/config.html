@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目配置 - 接口测试工具</title>
+    <link rel="stylesheet" href="css/boostrap.min.css">
+    <link rel="stylesheet" href="css/report-style.css">
+    <style>
+        .config-card {
+            max-width: 800px;
+            margin: 30px auto;
+        }
+        .required-label::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .config-item-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+        .config-item-card:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .form-description {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .error-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .was-validated .form-control:invalid {
+            border-color: #dc3545;
+        }
+        .was-validated .form-control:valid {
+            border-color: #198754;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- 返回导航 -->
+            <nav class="mb-4">
+                <a th:href="@{/}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> 返回首页
+                </a>
+            </nav>
+
+            <!-- 项目配置卡片 -->
+            <div class="card config-card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-gear"></i> 项目配置</h4>
+                    <span class="badge bg-light text-dark">项目ID: <span th:text="${projectId}"></span></span>
+                </div>
+                <div class="card-body">
+                    <!-- 项目信息概览 -->
+                    <div class="alert alert-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>项目名称：</strong><span th:text="${projectName}"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>配置项数量：</strong>
+                                <span th:text="${pagination.total}"></span> 项
+                                <span th:if="${pagination.totalPages > 1}">
+                                        （第 <span th:text="${currentPage}"></span>/<span th:text="${pagination.totalPages}"></span> 页）
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 测试环境选择 -->
+                    <div class="config-item-card">
+                        <label for="testEnvironment" class="form-label required-label">测试环境</label>
+                        <select class="form-select" id="testEnvironment" name="testEnvironment" required>
+                            <option value="">请选择测试环境</option>
+                            <option value="TEST">测试环境 (TEST)</option>
+                            <option value="STAGING">预发布环境 (STAGING)</option>
+                        </select>
+                        <div class="form-description">选择要执行测试的目标环境</div>
+                        <div class="error-feedback">请选择测试环境</div>
+                    </div>
+
+                    <!-- 动态配置项 -->
+                    <form id="configForm" class="needs-validation" novalidate>
+                        <div th:each="item : ${configItems}">
+                            <div class="config-item-card">
+                                <label th:for="${item.key}" class="form-label" th:classappend="${item.required} ? 'required-label' : ''">
+                                    <span th:text="${item.label}"></span>
+                                </label>
+
+                                <!-- 文本输入框 -->
+                                <input th:if="${item.type == 'text' || item.type == 'url' || item.type == 'email'}"
+                                       th:type="${item.type == 'password' ? 'password' : 'text'}"
+                                       class="form-control"
+                                       th:id="${item.key}"
+                                       th:name="${item.key}"
+                                       th:placeholder="${item.placeholder}"
+                                       th:value="${item.value}"
+                                       th:required="${item.required}"
+                                       th:minlength="${item.min}"
+                                       th:maxlength="${item.max}">
+
+                                <!-- 数字输入框 -->
+                                <input th:if="${item.type == 'number'}"
+                                       type="number"
+                                       class="form-control"
+                                       th:id="${item.key}"
+                                       th:name="${item.key}"
+                                       th:placeholder="${item.placeholder}"
+                                       th:value="${item.value}"
+                                       th:required="${item.required}"
+                                       th:min="${item.min}"
+                                       th:max="${item.max}"
+                                       step="1">
+
+                                <!-- 密码输入框 -->
+                                <input th:if="${item.type == 'password'}"
+                                       type="password"
+                                       class="form-control"
+                                       th:id="${item.key}"
+                                       th:name="${item.key}"
+                                       th:placeholder="${item.placeholder}"
+                                       th:required="${item.required}"
+                                       th:minlength="${item.min}"
+                                       th:maxlength="${item.max}">
+
+                                <div class="form-description" th:text="${item.description}"></div>
+                                <div class="error-feedback" th:id="${item.key + 'Error'}">此项为必填项</div>
+                            </div>
+                        </div>
+
+                        <!-- 分页控件 -->
+                        <div th:if="${pagination.totalPages > 1}" class="pagination-container">
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/config(projectId=${projectId}, page=${currentPage - 1})}">
+                                            上一页
+                                        </a>
+                                    </li>
+
+                                    <li th:each="page : ${#numbers.sequence(1, pagination.totalPages)}"
+                                        class="page-item" th:classappend="${page == currentPage} ? 'active' : ''">
+                                        <a class="page-link" th:href="@{/config(projectId=${projectId}, page=${page})}">
+                                            <span th:text="${page}"></span>
+                                        </a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${currentPage == pagination.totalPages} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/config(projectId=${projectId}, page=${currentPage + 1})}">
+                                            下一页
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
+                        <!-- 提交按钮 -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle"></i> 提交测试配置
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="saveConfig()">
+                                <i class="bi bi-save"></i> 保存配置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 表单验证和提交
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('configForm');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (form.checkValidity()) {
+                submitConfig();
+            } else {
+                // 显示自定义错误信息
+                showValidationErrors();
+            }
+
+            form.classList.add('was-validated');
+        });
+
+        // 实时验证
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                validateField(this);
+            });
+        });
+    });
+
+    function validateField(field) {
+        const errorElement = document.getElementById(field.id + 'Error');
+        if (field.checkValidity()) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            if (errorElement) errorElement.style.display = 'none';
+        } else {
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
+            if (errorElement) errorElement.style.display = 'block';
+        }
+    }
+
+    function showValidationErrors() {
+        const invalidFields = document.querySelectorAll('.is-invalid');
+        if (invalidFields.length > 0) {
+            invalidFields[0].focus();
+        }
+    }
+
+    function submitConfig() {
+        const formData = new FormData(document.getElementById('configForm'));
+        const config = Object.fromEntries(formData.entries());
+
+        // 显示加载状态
+        const submitBtn = document.querySelector('#configForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> 提交中...';
+
+        // 模拟API调用
+        setTimeout(() => {
+            console.log('提交配置:', config);
+
+            // 随机模拟成功或失败
+            const isSuccess = Math.random() > 0.3;
+
+            if (isSuccess) {
+                alert('配置提交成功！测试任务已创建。');
+                // 跳转到测试报告页面
+                window.location.href = '/api/test/report/123';
+            } else {
+                alert('配置提交失败，请检查参数后重试。');
+            }
+
+            // 恢复按钮状态
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }, 1500);
+    }
+
+    function saveConfig() {
+        const formData = new FormData(document.getElementById('configForm'));
+        const config = Object.fromEntries(formData.entries());
+
+        // 保存到localStorage
+        localStorage.setItem('projectConfig_' + [[${projectId}]], JSON.stringify(config));
+
+        // 显示成功提示
+        showToast('配置保存成功！', 'success');
+    }
+
+    function showToast(message, type) {
+        // 简单的toast实现
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        toast.innerHTML = `
+            <i class="bi bi-check-circle"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+</script>
+</body>
+</html>

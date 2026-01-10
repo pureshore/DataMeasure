@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接口参数测试工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding-bottom: 2rem;
+        }
+
+        .container {
+            max-width: 850px;
+            margin-top: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+
+        .card-header h4 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.4rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #d1d7e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background-color: #f0f7ff;
+        }
+
+        .file-upload-area i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        .file-info {
+            background-color: #e8f4ff;
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .recent-tests {
+            margin-top: 2rem;
+        }
+
+        .recent-tests h5 {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eaeff5;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 1rem;
+            border-radius: 8px;
+            background-color: white;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .test-item:hover {
+            background-color: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .test-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .test-name {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .test-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .test-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: #0a96c0;
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #d39e00;
+        }
+
+        .status-error {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #ced4da;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-cloud"></i> 接口参数测试工具</h1>
+        <p>快速验证API接口的正确性和稳定性</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-sliders-h"></i> 测试配置</h4>
+        </div>
+        <div class="card-body">
+            <form id="testForm" action="/api/test/submit" method="post" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="apiUrl" class="form-label">
+                        <i class="fas fa-link"></i> 接口URL *
+                    </label>
+                    <input type="url" class="form-control" id="apiUrl" name="apiUrl"
+                           placeholder="https://api.example.com/endpoint" required>
+                    <div class="form-text">请输入完整的接口地址，包含协议（http/https）</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="excelFile" class="form-label">
+                        <i class="fas fa-file-excel"></i> 测试数据Excel文件 *
+                    </label>
+
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击或拖拽Excel文件到此处上传</p>
+                        <small class="text-muted">支持 .xlsx 或 .xls 格式</small>
+                    </div>
+
+                    <input type="file" class="d-none" id="excelFile" name="excelFile"
+                           accept=".xlsx,.xls" required>
+
+                    <div class="file-info d-none" id="fileInfo">
+                        <i class="fas fa-file-excel text-primary"></i>
+                        <span id="fileName">未选择文件</span>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-submit">
+                        <span class="spinner-border spinner-border-sm" id="loadingSpinner" style="display: none;"></span>
+                        <i class="fas fa-play-circle"></i> 开始测试
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-history"></i> 最近测试任务</h4>
+        </div>
+        <div class="card-body">
+            <div class="recent-tests">
+                <h5><i class="fas fa-list"></i> 最近测试记录</h5>
+
+                <div class="test-list">
+                    <div class="test-item">
+                        <div class="test-info">
+                            <div class="test-name">用户信息查询接口</div>
+                            <div class="test-meta">
+                                <span><i class="far fa-clock"></i> 2023-10-15 14:30</span>
+                                <span><i class="fas fa-file-excel"></i> user_data.xlsx</span>
+                            </div>
+                        </div>
+                        <div class="test-status status-success">成功</div>
+                    </div>
+
+                    <div class="test-item">
+                        <div class="test-info">
+                            <div class="test-name">订单创建接口</div>
+                            <div class="test-meta">
+                                <span><i class="far fa-clock"></i> 2023-10-14 10:15</span>
+                                <span><i class="fas fa-file-excel"></i> order_test.xlsx</span>
+                            </div>
+                        </div>
+                        <div class="test-status status-error">失败</div>
+                    </div>
+
+                    <div class="test-item">
+                        <div class="test-info">
+                            <div class="test-name">支付状态验证</div>
+                            <div class="test-meta">
+                                <span><i class="far fa-clock"></i> 2023-10-13 16:45</span>
+                                <span><i class="fas fa-file-excel"></i> payment_data.xls</span>
+                            </div>
+                        </div>
+                        <div class="test-status status-success">成功</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>接口参数测试工具 v2.0 &copy; 2023</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('excelFile');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const form = document.getElementById('testForm');
+
+        // 文件上传区域点击事件
+        fileUploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // 文件选择事件
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('d-none');
+
+                // 添加成功反馈
+                fileUploadArea.innerHTML = `
+                    <i class="fas fa-check-circle text-success"></i>
+                    <p class="text-success">文件已选择</p>
+                    <small class="text-success">${file.name}</small>
+                `;
+                fileUploadArea.style.borderColor = '#28a745';
+                fileUploadArea.style.backgroundColor = '#e8f9f0';
+            }
+        });
+
+        // 拖拽功能
+        fileUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#4361ee';
+            fileUploadArea.style.backgroundColor = '#f0f7ff';
+        });
+
+        fileUploadArea.addEventListener('dragleave', function() {
+            fileUploadArea.style.borderColor = '#d1d7e0';
+            fileUploadArea.style.backgroundColor = '#f8fafc';
+        });
+
+        fileUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#d1d7e0';
+            fileUploadArea.style.backgroundColor = '#f8fafc';
+
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        });
+
+        // 表单提交事件
+        form.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const spinner = document.getElementById('loadingSpinner');
+            const icon = submitBtn.querySelector('i');
+
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            icon.style.display = 'none';
+            submitBtn.querySelector('span:not(#loadingSpinner)').textContent = ' 测试中...';
+        });
+    });
+</script>
+</body>
+</html>

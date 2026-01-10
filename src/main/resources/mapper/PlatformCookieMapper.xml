@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.agent.mapper.PlatformCookieMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="PlatformCookieResultMap" type="com.api.agent.dto.entity.PlatformCookie">
+        <id property="id" column="id"/>
+        <result property="platformName" column="platform_name"/>
+        <result property="cookieValue" column="cookie_value"/>
+        <result property="accountName" column="account_name"/>
+        <result property="status" column="status"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="extraInfo" column="extra_info"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO platform_cookies(
+        platform_name, cookie_value, account_name, status,
+        expire_time, create_time, update_time, extra_info
+        ) VALUES
+        <foreach collection="list" item="cookie" separator=",">
+            (
+            #{cookie.platformName}, #{cookie.cookieValue}, #{cookie.accountName}, #{cookie.status},
+            #{cookie.expireTime}, #{cookie.createTime}, #{cookie.updateTime}, #{cookie.extraInfo}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 动态条件查询 -->
+    <select id="selectByDynamicCondition" parameterType="map" resultMap="PlatformCookieResultMap">
+        SELECT * FROM platform_cookies
+        <where>
+            <if test="platformName != null and platformName != ''">
+                AND platform_name = #{platformName}
+            </if>
+            <if test="platformNames != null and platformNames.size() > 0">
+                AND platform_name IN
+                <foreach collection="platformNames" item="platform" open="(" separator="," close=")">
+                    #{platform}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND status IN
+                <foreach collection="statusList" item="s" open="(" separator="," close=")">
+                    #{s}
+                </foreach>
+            </if>
+            <if test="accountName != null and accountName != ''">
+                AND account_name LIKE CONCAT('%', #{accountName}, '%')
+            </if>
+            <if test="minExpireTime != null">
+                AND expire_time &gt;= #{minExpireTime}
+            </if>
+            <if test="maxExpireTime != null">
+                AND expire_time &lt;= #{maxExpireTime}
+            </if>
+            <if test="expired != null and expired">
+                AND expire_time &lt; NOW()
+            </if>
+            <if test="notExpired != null and notExpired">
+                AND (expire_time IS NULL OR expire_time &gt; NOW())
+            </if>
+            <if test="minUpdateTime != null">
+                AND update_time &gt;= #{minUpdateTime}
+            </if>
+            <if test="maxUpdateTime != null">
+                AND update_time &lt;= #{maxUpdateTime}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- 批量更新状态（XML版本） -->
+    <update id="batchUpdateStatusByXML">
+        UPDATE platform_cookies
+        SET status = #{status},
+        update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        <if test="platformName != null and platformName != ''">
+            AND platform_name = #{platformName}
+        </if>
+    </update>
+
+    <!-- 批量更新Cookie值 -->
+    <update id="batchUpdateCookies" parameterType="java.util.List">
+        <foreach collection="list" item="cookie" separator=";">
+            UPDATE platform_cookies
+            <set>
+                <if test="cookie.cookieValue != null">
+                    cookie_value = #{cookie.cookieValue},
+                </if>
+                <if test="cookie.accountName != null">
+                    account_name = #{cookie.accountName},
+                </if>
+                <if test="cookie.status != null">
+                    status = #{cookie.status},
+                </if>
+                <if test="cookie.expireTime != null">
+                    expire_time = #{cookie.expireTime},
+                </if>
+                <if test="cookie.extraInfo != null">
+                    extra_info = #{cookie.extraInfo},
+                </if>
+                update_time = NOW()
+            </set>
+            WHERE platform_name = #{cookie.platformName}
+        </foreach>
+    </update>
+
+    <!-- 批量逻辑删除 -->
+    <update id="batchLogicDelete">
+        UPDATE platform_cookies
+        SET status = 0,
+        update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 批量物理删除 -->
+    <delete id="batchDelete">
+        DELETE FROM platform_cookies
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 查询统计信息 -->
+    <select id="selectStatistics" resultType="map">
+        SELECT
+        COUNT(*) as total_count,
+        COUNT(CASE WHEN status = 1 THEN 1 END) as active_count,
+        COUNT(CASE WHEN status = 0 THEN 1 END) as inactive_count,
+        COUNT(CASE WHEN expire_time &lt; NOW() THEN 1 END) as expired_count,
+        MIN(create_time) as oldest_create_time,
+        MAX(update_time) as latest_update_time
+        FROM platform_cookies
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectByPage" parameterType="map" resultMap="PlatformCookieResultMap">
+        SELECT * FROM platform_cookies
+        <where>
+            <if test="condition.platformName != null and condition.platformName != ''">
+                AND platform_name = #{condition.platformName}
+            </if>
+            <if test="condition.status != null">
+                AND status = #{condition.status}
+            </if>
+            <if test="condition.accountName != null and condition.accountName != ''">
+                AND account_name LIKE CONCAT('%', #{condition.accountName}, '%')
+            </if>
+        </where>
+        ORDER BY ${orderBy} ${orderDirection}
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 检查平台是否存在 -->
+    <select id="existsByPlatformName" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM platform_cookies WHERE platform_name = #{platformName}
+    </select>
+
+    <!-- 获取所有不重复的平台名称 -->
+    <select id="selectDistinctPlatformNames" resultType="string">
+        SELECT DISTINCT platform_name FROM platform_cookies WHERE status = 1 ORDER BY platform_name
+    </select>
+
+</mapper>

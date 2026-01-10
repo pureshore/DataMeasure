@@ -1,0 +1,13 @@
+CREATE TABLE platform_cookies (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    platform_name VARCHAR(50) NOT NULL UNIQUE,
+    cookie_value TEXT,
+    account_name VARCHAR(100),
+    status INT DEFAULT 1,
+    expire_time DATETIME,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    extra_info TEXT,
+    INDEX idx_platform (platform_name),
+    INDEX idx_status (status)
+);
