@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Accessors(chain = true)
 @Data
@@ -21,6 +22,8 @@ public class JiraDetailDO implements Serializable {
 
     private String jiraNo;
     private String jiraName;
+    private String jiraType;
+    private List<String> labels;
     private String labelName;
     private String productLine;
     private String testOwner;
