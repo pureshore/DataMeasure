@@ -1,0 +1,27 @@
+CREATE TABLE jira_detail (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    jira_no VARCHAR(50) NOT NULL UNIQUE COMMENT 'JIRA单号（唯一）',
+    jira_name VARCHAR(500) NOT NULL COMMENT 'JIRA名称',
+    jira_type ENUM('COMPLAINT', 'BUGFIX', 'DELAY', 'FEATURE', 'TASK', 'IMPROVEMENT', 'OTHER') 
+        NOT NULL DEFAULT 'BUGFIX' COMMENT 'JIRA单类型：COMPLAINT-客诉单，BUGFIX-bug修复，DELAY-延期缺陷，FEATURE-新功能，TASK-任务，IMPROVEMENT-优化，OTHER-其他',
+    label_name VARCHAR(50) COMMENT 'JIRA标签',
+    product_line VARCHAR(100) NOT NULL COMMENT '产品线',
+    test_owner VARCHAR(100) COMMENT '测试负责人',
+    dev_owner VARCHAR(100) COMMENT '开发负责人',
+    status TINYINT DEFAULT 1 COMMENT '状态：0-删除，1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    INDEX idx_jira_no (jira_no),
+    INDEX idx_product_line (product_line),
+    INDEX idx_jira_type (jira_type),
+    INDEX idx_create_time (create_time),
+    INDEX idx_test_owner (test_owner),
+    INDEX idx_dev_owner (dev_owner)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='JIRA数据详情表';
+
+
+INSERT INTO jira_detail (jira_no, jira_name, jira_type, label_name, product_line, test_owner, dev_owner) VALUES
+('PROJ-001', '用户登录失败问题', 'COMPLAINT', '["urgent", "customer"]', '用户中心', '张三', '李四'),
+('PROJ-002', '支付接口重构', 'FEATURE', '["refactor", "backend"]', '支付系统', '王五', '赵六'),
+('PROJ-003', '数据库连接超时', 'BUGFIX', '["performance", "database"]', '基础服务', '孙七', '周八'),
+('PROJ-004', '项目交付延期', 'DELAY', '["delay", "management"]', '项目管理', '钱九', '吴十');

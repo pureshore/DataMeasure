@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.api.agent.mapper.StudentMapper">
-    <resultMap id="studentResultMap" type="com.api.agent.dto.entity.Student">
+<mapper namespace="com.hik.test.data.mapper.StudentMapper">
+    <resultMap id="studentResultMap" type="com.hik.test.data.dto.entity.Student">
         <id property="id" column="id" />
         <result property="name" column="name" />
         <result property="gender" column="gender" />
@@ -13,13 +13,13 @@
         <result property="updateTime" column="update_time" />
     </resultMap>
 
-    <insert id="insert" parameterType="com.api.agent.dto.entity.Student"
+    <insert id="insert" parameterType="com.hik.test.data.dto.entity.Student"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO student (name, gender, age, class_name)
         VALUES (#{name}, #{gender}, #{age}, #{className})
     </insert>
 
-    <update id="update" parameterType="com.api.agent.dto.entity.Student">
+    <update id="update" parameterType="com.hik.test.data.dto.entity.Student">
         UPDATE student
         SET
         name = #{name},

@@ -26,7 +26,7 @@
     </appender>
 
     <!-- 设置包的日志级别 -->
-    <logger name="com.api.agent.utils.JsonPathUtils" level="DEBUG" additivity="false">
+    <logger name="com.hik.test.data.utils.JsonPathUtils" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>

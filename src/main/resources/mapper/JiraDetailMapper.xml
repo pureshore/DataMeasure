@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.jira.mapper.JiraDetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.jira.entity.JiraDetail">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="jira_number" property="jiraNumber" jdbcType="VARCHAR"/>
+        <result column="jira_name" property="jiraName" jdbcType="VARCHAR"/>
+        <result column="label_name" property="labelName" jdbcType="VARCHAR"/>
+        <result column="product_line" property="productLine" jdbcType="VARCHAR"/>
+        <result column="test_owner" property="testOwner" jdbcType="VARCHAR"/>
+        <result column="dev_owner" property="devOwner" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, jira_number, jira_name,
+        label_name, product_line, test_owner, dev_owner, status
+    </sql>
+
+    <!-- 插入数据 -->
+    <insert id="insert" parameterType="com.example.jira.entity.JiraDetail"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO jira_detail (
+        jira_number, jira_name, label_name,
+        product_line, test_owner, dev_owner, status
+        ) VALUES (
+        #{jiraNumber}, #{jiraName},
+        #{labelName},
+        #{productLine}, #{testOwner}, #{devOwner}, #{status}
+        )
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO jira_detail (
+        jira_number, jira_name, label_name,
+        product_line, test_owner, dev_owner, status
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.jiraNumber}, #{item.jiraName},
+            #{item.labelName},
+            #{item.productLine}, #{item.testOwner}, #{item.devOwner}, #{item.status}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM jira_detail
+        WHERE id = #{id} AND status = 1
+    </select>
+
+    <!-- 根据JIRA单号查询 -->
+    <select id="selectByJiraNumber" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM jira_detail
+        WHERE jira_number = #{jiraNumber} AND status = 1
+    </select>
+
+    <!-- 分页查询 -->
+<!--    <select id="selectPage" parameterType="com.example.jira.dto.JiraQueryDTO" resultMap="BaseResultMap">-->
+<!--        SELECT-->
+<!--        <include refid="Base_Column_List"/>-->
+<!--        FROM jira_detail-->
+<!--        WHERE status = 1-->
+<!--        <if test="jiraNumber != null and jiraNumber != ''">-->
+<!--            AND jira_number LIKE CONCAT('%', #{jiraNumber}, '%')-->
+<!--        </if>-->
+<!--        <if test="jiraName != null and jiraName != ''">-->
+<!--            AND jira_name LIKE CONCAT('%', #{jiraName}, '%')-->
+<!--        </if>-->
+<!--        <if test="productLine != null and productLine != ''">-->
+<!--            AND product_line = #{productLine}-->
+<!--        </if>-->
+<!--        <if test="testOwner != null and testOwner != ''">-->
+<!--            AND test_owner = #{testOwner}-->
+<!--        </if>-->
+<!--        <if test="devOwner != null and devOwner != ''">-->
+<!--            AND dev_owner = #{devOwner}-->
+<!--        </if>-->
+<!--        <if test="startTime != null">-->
+<!--            AND create_time >= #{startTime}-->
+<!--        </if>-->
+<!--        <if test="endTime != null">-->
+<!--            AND create_time &lt;= #{endTime}-->
+<!--        </if>-->
+<!--        ORDER BY-->
+<!--        <choose>-->
+<!--            <when test="orderBy != null and orderBy != ''">-->
+<!--                ${orderBy}-->
+<!--            </when>-->
+<!--            <otherwise>-->
+<!--                create_time DESC-->
+<!--            </otherwise>-->
+<!--        </choose>-->
+<!--    </select>-->
+
+    <!-- 更新数据 -->
+    <update id="update" parameterType="com.example.jira.entity.JiraDetail">
+        UPDATE jira_detail
+        <set>
+            <if test="jiraName != null">
+                jira_name = #{jiraName},
+            </if>
+            <if test="labelName != null">
+                label_name = #{labelName},
+            </if>
+            <if test="productLine != null">
+                product_line = #{productLine},
+            </if>
+            <if test="testOwner != null">
+                test_owner = #{testOwner},
+            </if>
+            <if test="devOwner != null">
+                dev_owner = #{devOwner},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        WHERE id = #{id} AND status = 1
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteById" parameterType="java.lang.Long">
+        UPDATE jira_detail
+        SET status = 0
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量逻辑删除 -->
+    <update id="batchDelete" parameterType="java.util.List">
+        UPDATE jira_detail
+        SET status = 0
+        WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 统计各产品线的JIRA数量 -->
+<!--    <select id="countByProductLine" resultType="com.example.jira.dto.ProductLineCountDTO">-->
+<!--        SELECT-->
+<!--        product_line as productLine,-->
+<!--        COUNT(*) as count-->
+<!--        FROM jira_detail-->
+<!--        WHERE status = 1-->
+<!--        GROUP BY product_line-->
+<!--        ORDER BY count DESC-->
+<!--    </select>-->
+
+    <!-- 根据负责人统计 -->
+    <select id="countByOwner" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+        test_owner as testOwner,
+        dev_owner as devOwner,
+        COUNT(*) as count
+        FROM jira_detail
+        WHERE status = 1
+        AND (test_owner = #{owner} OR dev_owner = #{owner})
+        GROUP BY test_owner, dev_owner
+    </select>
+</mapper>
