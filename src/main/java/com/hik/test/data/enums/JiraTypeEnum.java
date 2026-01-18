@@ -1,4 +1,4 @@
-package com.hik.test.data.manager;
+package com.hik.test.data.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

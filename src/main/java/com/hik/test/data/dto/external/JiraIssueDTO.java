@@ -2,7 +2,7 @@ package com.hik.test.data.dto.external;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hik.test.data.dto.JiraDetailDO;
-import com.hik.test.data.manager.JiraTypeEnum;
+import com.hik.test.data.enums.JiraTypeEnum;
 import lombok.Data;
 
 import java.util.Date;

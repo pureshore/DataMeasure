@@ -1,6 +1,5 @@
 package com.hik.test.data.dto;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 import java.util.Map;
